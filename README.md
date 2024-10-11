@@ -1,7 +1,9 @@
 # aro-terraform
 Basic ARO deployment and configuration using Terraform and OpenShift GitOps
 
-## demo platform variables
+## Cluster 
+
+### Red Hat demo platform variables
 
 When creating the cluster in the RH demo environment, we have to use an existing Axure Service Principal as we do not have access to the Azure AD for the Red Hat tenancy.
 
@@ -26,7 +28,7 @@ az ad sp show --id $CLIENT_ID --query id -o tsv
 The redhat_openshift_provider_id can be extracted (note you need to `az login` first):
 `az provider show -n Microsoft.RedHatOpenShift --query "authorizations[0].applicationId" -o tsv`
 
-## Cluster build
+### Cluster build
 
 Login to Azure using your RH credentials (redirects to a browser):
 
@@ -41,3 +43,17 @@ Kick off the build:
 ``
 
 It will take ~<~= 1 hour to build
+
+### Get details
+
+The terraform will output the cluster URL, API URL and associated IP addresses to the console on completion.  The DNS configuration will need to be updated with these IP addresses.
+
+Other useful values can be extracted using the `az aro` command:
+
+```
+az aro list
+az aro show --name aro --resource-group craig-aro-terraform
+az aro list-credentials --name aro --resource-group craig-aro-terraform
+az aro get-admin-kubeconfig --name aro --resource-group craig-aro-terraform
+```
+
