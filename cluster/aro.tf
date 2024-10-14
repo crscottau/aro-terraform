@@ -69,6 +69,7 @@ resource "azurerm_redhat_openshift_cluster" "ocp_cluster" {
   cluster_profile {
     domain  = var.domain_name
     version = var.openshift_version
+    pull_secret = var.pull_secret
   }
 
   network_profile {

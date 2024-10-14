@@ -58,6 +58,12 @@ variable domain_name {
   default     = "azure.redhatworkshops.io"
 }
 
+variable pull_secret {
+  type        = string
+  description = "Path to the pull secret for the cluster"
+  default     = ""
+}
+
 variable vnet_address_space {
   type        = string
   description = "vnet address space"
