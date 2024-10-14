@@ -4,11 +4,11 @@ provider "helm" {
   }
 }
 
-resource "helm_release" "openshift-gitops" {
-  name       = "openshift-gitops"
+resource "helm_release" "openshift-gitops-application" {
+  name       = "openshift-gitops-application"
 
   repository = "http://bootstrap.gpslab.cbr.redhat.com/helm"
-  chart      = "openshift-gitops"
+  chart      = "openshift-gitops-application"
 
   set {
     name  = "redhat_catalogue_source"
