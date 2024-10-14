@@ -1,6 +1,6 @@
 provider "helm" {
   kubernetes {
-    config_path = "../cluster/kubeconfig"
+    config_path = var.kubeconfig_path
   }
 }
 

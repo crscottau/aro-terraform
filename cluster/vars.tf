@@ -61,7 +61,6 @@ variable domain_name {
 variable pull_secret {
   type        = string
   description = "Path to the pull secret for the cluster"
-  default     = ""
 }
 
 variable vnet_address_space {

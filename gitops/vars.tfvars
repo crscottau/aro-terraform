@@ -1,0 +1,1 @@
+kubeconfig_path =  "/home/crscott/aro-terraform/cluster/kubeconfig"
