@@ -32,7 +32,7 @@ variable redhat_openshift_provider_id {
 variable "openshift_version" {
   type        = string
   description = "az aro get-versions -l eastus"
-  default = "4.15.27"
+  default     = "4.15.27"
 }
 
 variable region {
@@ -42,8 +42,8 @@ variable region {
 }
 
 variable resource_group_name {
-  type     = string
-  default  = "craig-aro-terraform"
+  type        = string
+  description = R"Resource group"
 }
 
 variable cluster_name {
