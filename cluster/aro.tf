@@ -34,7 +34,7 @@ resource "azurerm_role_assignment" "role_network2" {
 }
 
 resource "azurerm_resource_group" "client_config" {
-  name     = var.resource_group_name
+  name     = var.resource_group
   location = var.region
 }
 
