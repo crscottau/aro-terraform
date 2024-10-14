@@ -43,7 +43,7 @@ variable region {
 
 variable resource_group_name {
   type        = string
-  description = R"Resource group"
+  description = "Resource group"
 }
 
 variable cluster_name {
