@@ -41,7 +41,7 @@ variable region {
   default     = "eastus"
 }
 
-variable resource_group_name {
+variable resource_group {
   type        = string
   description = "Resource group"
 }
