@@ -27,6 +27,5 @@ spec:
       - CreateNamespace=true 
 EOT
   )
-  depends_on = [ kubernetes_manifest.gitops_subscription ] 
 
 }
