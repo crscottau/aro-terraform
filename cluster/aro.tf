@@ -124,3 +124,27 @@ output "api_server_ip" {
 output "ingress_ip" {
   value = azurerm_redhat_openshift_cluster.ocp_cluster.ingress_profile[0].ip_address
 }
+
+# Get the kubeconfig file for the cluster
+resource "null_resource" "get_kubeconfig" {
+  provisioner "local-exec" {
+    command = <<EOT
+    az aro get-admin-kubeconfig \
+      --name ${azurerm_redhat_openshift_cluster.ocp_cluster.name} \
+      --resource-group ${azurerm_resource_group.ocp_cluster.name} 
+    EOT
+  }
+}
+
+# Bypass the self-signed certificate
+resource "null_resource" "edit_file" {
+  provisioner "local-exec" {
+    command = "sed -i '/- cluster:/a\\    insecure-skip-tls-verify: true' kubeconfig" 
+  }
+
+  depends_on = [null_resource.get_kubeconfig]
+}
+
+output "kubeconfig_file" {
+  value = "kubeconfig"
+}
