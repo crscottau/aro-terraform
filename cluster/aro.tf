@@ -131,7 +131,7 @@ resource "null_resource" "get_kubeconfig" {
     command = <<EOT
     az aro get-admin-kubeconfig \
       --name ${azurerm_redhat_openshift_cluster.ocp_cluster.name} \
-      --resource-group ${azurerm_resource_group.ocp_cluster.name} 
+      --resource-group ${azurerm_resource_group.client_config.name} 
     EOT
   }
 }
