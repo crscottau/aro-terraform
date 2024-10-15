@@ -58,7 +58,7 @@ metadata:
   name: ${var.catalogue_name}
   namespace: openshift-marketplace
 spec:
-  sourceType: gprc
+  sourceType: grpc
   image: craig.azurecr.io/openshift4/redhat/redhat-operator-index:v4.15
 EOT
   )
@@ -84,31 +84,3 @@ EOT
 
 }
 
-resource "kubernetes_manifest" "gitops_application" {
-  manifest = yamldecode(<<EOT
-apiVersion: argoproj.io/v1alpha1
-kind: Application
-metadata:
-  name: ${var.application_name}
-  namespace: openshift-gitops
-spec:
-  destination:
-    namespace: openshift-operators
-    server: https://kubernetes.default.svc
-  project: default
-  source:
-    directory:
-      jsonnet: {}
-      recurse: true
-    path: ${var.application_path }
-    repoURL: ${var.application_repo }
-    targetRevision: HEAD
-  syncPolicy:
-    automated: {}
-    syncOptions:
-      - CreateNamespace=true 
-EOT
-  )
-  depends_on = [ kubernetes_manifest.gitops_subscription ] 
-
-}
