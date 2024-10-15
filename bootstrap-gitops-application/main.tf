@@ -7,7 +7,7 @@ resource "kubernetes_manifest" "gitops_application" {
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ${var.application_name}
+  name: cluster-config
   namespace: openshift-gitops
 spec:
   destination:
@@ -18,8 +18,8 @@ spec:
     directory:
       jsonnet: {}
       recurse: true
-    path: ${var.application_path }
-    repoURL: ${var.application_repo }
+    path: applications
+    repoURL: https://github.com/crscottau/aro-gitops.git
     targetRevision: HEAD
   syncPolicy:
     automated: {}
