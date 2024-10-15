@@ -4,10 +4,10 @@ provider kubernetes {
 
 # Even though these blocks are cut/paste from the "oc mirror" output, 
 # Terraform seems to want a variable or it will not pass the validate test
-resource "kubernetes_manifest" "imagecontentsourcepolicy" {
-  manifest = <<EOT
+resource "kubernetes_manifest" "imagecontentsourcepolicy1" {
+  manifest = yamldecode(<<EOT
 apiVersion: operator.openshift.io/v1alpha1
-kind: ${var.icsp}
+kind: ImageContentSourcePolicy
 metadata:
   name: generic-0
 spec:
@@ -15,9 +15,14 @@ spec:
   - mirrors:
     - craig.azurecr.io/openshift4/openshift4
     source: registry.redhat.io/openshift4
----
+EOT
+  )
+}
+
+resource "kubernetes_manifest" "imagecontentsourcepolicy2" {
+  manifest = yamldecode(<<EOT
 apiVersion: operator.openshift.io/v1alpha1
-kind: ${var.icsp}
+kind: ImageContentSourcePolicy
 metadata:
   labels:
     operators.openshift.org/catalog: "true"
@@ -40,13 +45,13 @@ spec:
     - craig.azurecr.io/openshift4/rhel8
     source: registry.redhat.io/rhel8
 EOT
-
+  )
 }
 
 # Even though these blocks are cut/paste from the "oc mirror" output, 
 # Terraform seems to want a variable or it will not pass the validate test
 resource "kubernetes_manifest" "cataloguesource" {
-  manifest = <<EOT
+  manifest = yamldecode(<<EOT
 apiVersion: operators.coreos.com/v1alpha1
 kind: CatalogSource
 metadata:
@@ -56,10 +61,11 @@ spec:
   sourceType: gprc
   image: craig.azurecr.io/openshift4/redhat/redhat-operator-index:v4.15
 EOT
+  )
 }
 
 resource "kubernetes_manifest" "gitops_subscription" {
-  manifest = <<EOT
+  manifest = yamldecode(<<EOT
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -72,13 +78,14 @@ spec:
   source: ${var.catalogue_name}
   sourceNamespace: openshift-marketplace
 EOT
+  )
 
-  depends_on = [ kubernetes_manifest.cataloguesource, kubernetes_manifest.imagecontentsourcepolicy ] 
+  depends_on = [ kubernetes_manifest.cataloguesource, kubernetes_manifest.imagecontentsourcepolicy1, kubernetes_manifest.imagecontentsourcepolicy2 ] 
 
 }
 
 resource "kubernetes_manifest" "gitops_application" {
-  manifest = <<EOT
+  manifest = yamldecode(<<EOT
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -101,7 +108,7 @@ spec:
     syncOptions:
       - CreateNamespace=true 
 EOT
-
+  )
   depends_on = [ kubernetes_manifest.gitops_subscription ] 
 
 }
