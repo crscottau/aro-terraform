@@ -1,11 +1,13 @@
 # aro-terraform
 Basic ARO deployment and configuration using Terraform and OpenShift GitOps
 
-## Cluster 
+## Cluster build
+
+The cluster build Terraform code is in the cluster subdirectory.
 
 ### Red Hat demo platform variables
 
-When creating the cluster in the RH demo environment, we have to use an existing Axure Service Principal as we do not have access to the Azure AD for the Red Hat tenancy.
+When creating the cluster in the RH demo environment, we have to use an existing Azure Service Principal as we do not have access to the Azure AD for the Red Hat tenancy.
 
 After creating a demo environment, you will receive an email with the following details:
 
@@ -15,6 +17,7 @@ After creating a demo environment, you will receive an email with the following 
 - Application/Client/Service Principal ID: <client ID>
 - Password: <password>>
 - Tenant ID: redhat0.onmicrosoft.com
+- Red Hat pull secret, or the equivalent pull secret for a private container registry.
 
 Copy the appropriare values into the private __secrets.tfvars__ file
 
@@ -40,13 +43,20 @@ Update vars.tfvars if you want to override any of the default variables, such as
 
 Kick off the build:
 
-``
+```
+$ terraform init
+$ terraform validate
+$ terraform plan -var-file vars.tfvars -var-file secrets.tfvars -out ocp.out
+$ terraform apply ocp.out
+```
 
 It will take ~<~= 1 hour to build
 
 ### Get details
 
-The terraform will output the cluster URL, API URL and associated IP addresses to the console on completion.  The DNS configuration will need to be updated with these IP addresses.
+The terraform will output the cluster URL, API URL and associated IP addresses to the console on completion.  A kubeconfig file that is used by the subsequent steps to apply and configure OpenShift GitOps and that can be used for cluster authentication is also exported.
+
+The DNS configuration will need to be updated with the cluster IP addresses.
 
 Other useful values can be extracted using the `az aro` command:
 
@@ -57,30 +67,23 @@ az aro list-credentials --name aro --resource-group craig-aro-terraform
 az aro get-admin-kubeconfig --name aro --resource-group craig-aro-terraform
 ```
 
-## Current issues
+## Cluster Configuration
 
-1. Getting the kubeconfig file automatically - need to check the documentation but it is probably simple enough
-2. Need to automate the edit of the file to add **insecure-skip-tls-verify: true** to the cluster stanza
-3. Need to be able to apply the local catalogsource and imagecontentsourcepolicy YAML
-4. Need to be able to disable the default catalogsources (Adding a pull secret appears to enable them automatically, alternative might be to not provide a pull secret and update it later)
-5. Need a delay between the gitops helm chart and the gitops-application helm chart
+The cluster configuration is in the bootstrap-gitops and bootstrap-gitops-application subdirectories. The Terraform in bootstrap-gitops has to be run before that in bootstrap-gitops-application.
 
-### Problem 1
+The GitOps application needs to be created in a separate step as the CRDs are not created until the Operator is installed and so the plan bootstrap-gitops-application fails if they are combined.
 
-Run the **az aro** command to extract the kubeconfig file after the cluster is built
+The Terraform Kubernetes provider used to apply the configuration is expecting the kubeconfig file that was exported at the end of the cluster build to enable cluster authentication.
 
-### Problem 2
+### bootstrap-gitops 
 
-Include a **sed** command to add the string
+This code uses the Terraform Kubernetes provider to apply the following changes to the cluster:
 
-### problem 3
+- Disable the default Red Hat catalogue sources
+- Apply the ImageContentSourcePolicy and CatalogSource YAML files generated when populating the ACR registry with Operator and other images using the **oc mirror** plugin (Note that these files need to be made available to the code by placing them in the same subdirectory.  Also, the ImageContentSourcePolicy has to be split into 2 files, one for each policy.)
+- Create the ClusterRoleBinding to give OpenShift GitOps ClusterAdmin permissions
+- Install the OpenShift GitOps Operator
 
-These might need to be hard coded into a helm chart
+### bootstrap-gitops-application
 
-### problem 4
-
-Do include the pull secretm, and disable the default catalogue sources this as part of a gitops application
-
-### problem 5
-
-Could ADO do this?
+This code uses the Terraform Kubernetes provider to apply the OpenShift "application of applications" to the cluster.  The repository and path variables need to be updated to where the application YAML resides.
