@@ -113,16 +113,25 @@ output "console_url" {
   value = azurerm_redhat_openshift_cluster.ocp_cluster.console_url
 }
 
+output "ingress_ip" {
+  value = azurerm_redhat_openshift_cluster.ocp_cluster.ingress_profile[0].ip_address
+
+  depends_on = [ console_url ]
+
+}
+
 output "api_url" {
   value = azurerm_redhat_openshift_cluster.ocp_cluster.api_server_profile[0].url
+
+  depends_on = [ ingress_ip ]
+
 }
 
 output "api_server_ip" {
   value = azurerm_redhat_openshift_cluster.ocp_cluster.api_server_profile[0].ip_address
-}
 
-output "ingress_ip" {
-  value = azurerm_redhat_openshift_cluster.ocp_cluster.ingress_profile[0].ip_address
+  depends_on = [ api_url ]
+  
 }
 
 # Get the kubeconfig file for the cluster
