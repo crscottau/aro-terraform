@@ -38,7 +38,6 @@ variable "openshift_version" {
 variable region {
   type        = string
   description = "Region"
-  default     = "eastus"
 }
 
 variable resource_group {

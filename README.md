@@ -50,7 +50,7 @@ $ terraform plan -var-file vars.tfvars -var-file secrets.tfvars -out ocp.out
 $ terraform apply ocp.out
 ```
 
-It will take ~<~= 1 hour to build
+It will take ~<= 1 hour to build
 
 ### Get details
 
