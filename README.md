@@ -87,3 +87,35 @@ This code uses the Terraform Kubernetes provider to apply the following changes 
 ### bootstrap-gitops-application
 
 This code uses the Terraform Kubernetes provider to apply the OpenShift "application of applications" to the cluster.  The repository and path variables need to be updated to where the application YAML resides.
+
+## Supporting infrastructure
+
+### Azure Container Registry
+
+```
+ACR_NAME=craig
+az acr create --resource-group $RESOURCEGROUP --name $ACR_NAME --sku Basic
+az acr token create --name acruser --registry craig --repository "*" content/write content/read content/delete metadata/read metadata/write --output json
+```
+
+### Azure Key Vault
+
+```
+AKV_NAME=craig-vault
+az keyvault create --name $AKV_NAME --resource-group $RESOURCEGROUP
+```
+
+Apply RBAC
+
+`az role assignment create --role "Key Vault Adnministrator" --assignee "crscott@redhat.com" --scope $AKV_NAME`
+
+Create a secret
+
+`az keyvault secret set --vault-name $AKV_NAME --name "postgres-user" --value '{"username": "USERNAME", "password": "PASSWORD"}'`
+
+### Log Analytics Workspace
+
+```
+LAW_NAME=craig-law
+az monitor log-analytics workspace create --resource-group $RESOURCEGROUP --workspace-name $LAW_NAME
+```
