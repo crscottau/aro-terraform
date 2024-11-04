@@ -93,9 +93,9 @@ This code uses the Terraform Kubernetes provider to apply the OpenShift "applica
 ### Azure Container Registry
 
 ```
-ACR_NAME=craig
+ACR_NAME=craigacr
 az acr create --resource-group $RESOURCEGROUP --name $ACR_NAME --sku Basic
-az acr token create --name acruser --registry craig --repository "*" content/write content/read content/delete metadata/read metadata/write --output json
+az acr token create --name acruser --registry $ACR_NAME --repository "*" content/write content/read content/delete metadata/read metadata/write --output json
 ```
 
 ### Azure Key Vault
@@ -118,4 +118,19 @@ Create a secret
 ```
 LAW_NAME=craig-law
 az monitor log-analytics workspace create --resource-group $RESOURCEGROUP --workspace-name $LAW_NAME
+```
+
+Extract the WORKSPACE_ID and SHARED_KEY:
+
+```
+WORKSPACE_ID=$(az monitor log-analytics workspace show -g $RESOURCEGROUP -n $LAW_NAME --query customerId -o tsv)
+echo $WORKSPACE_ID
+SHARED_KEY=$(az monitor log-analytics workspace get-shared-keys -g $RESOURCEGROUP -n $LAW_NAME --query primarySharedKey -o tsv)
+echo $SHARED_KEY
+```
+
+Once the operator is installed (and the namesapce created), create a secret to allow access to the LAW.  The variable SHARED_KEY comes from above:
+
+```
+oc -n openshift-logging create secret generic azure-monitor-shared-key --from-literal=shared_key=${SHARED_KEY}
 ```
